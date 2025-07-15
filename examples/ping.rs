@@ -1,7 +1,7 @@
 use std::time::Duration;
 
 use anyhow::{Error, Result};
-use sfn_tpn::interface::NetcodeInterface;
+use sfn_tpn::NetcodeInterface;
 use tokio::time::sleep;
 
 /// Return whether our process is a client.
@@ -48,14 +48,14 @@ fn ticket() -> Result<String> {
 async fn main() -> Result<()> {
     if is_client()? {
         // create a send side & send a ping
-        NetcodeInterface::new(true, Some(ticket()?));
+        NetcodeInterface::new(Some(ticket()?));
 
         loop {
             sleep(Duration::from_secs(1)).await;
         }
     } else {
         // create the receive side
-        NetcodeInterface::new(false, None);
+        NetcodeInterface::new(None);
 
         loop {
             sleep(Duration::from_secs(1)).await;
