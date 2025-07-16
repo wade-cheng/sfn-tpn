@@ -116,11 +116,11 @@ impl ProtocolHandler for PieceBoard {
     ///
     /// Server is player with second move.
     ///
-    /// The returned future runs on a newly spawned tokio task, so it can run as long as
-    /// the connection lasts.
-    ///
     /// We have not coded checks for if multiple people have tried connecting
-    /// to us. That's bad. TODO.
+    /// to us. That's bad. TODO. ERM. Actually, turns out this function must have the
+    /// immutable reference to itself instead of mutable because the trait assumes multiple
+    /// clients might connect. This means we can't use tokio Reciever::recv, which requires
+    /// a mutable Reciever :/
     async fn accept(&self, connection: Connection) -> Result<(), AcceptError> {
         // We can get the remote's node id from the connection.
         let node_id = connection.remote_node_id()?;

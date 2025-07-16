@@ -13,8 +13,8 @@ use tokio::{
 /// called from the context of a Tokio runtime. The procedure for operation
 /// is as follows.
 ///
-/// A [`new`][`NetcodeInterface::new`] `NetcodeInterface` should be created at
-/// both machines running the game. The first, the "server," must provide
+/// A [`new`][`NetcodeInterface::new`] `NetcodeInterface` should be created on
+/// the two players' machines. The first, the "server," must provide
 /// `None` ticket. The second, the "client," must provide `Some` ticket string
 /// the server reveals. (The server currently prints it to stdout. In the future,
 /// this might be relayed through a tokio oneshot thing.)
@@ -29,7 +29,7 @@ use tokio::{
 /// If it is not the user's turn, they may:
 ///
 /// - [`try_recv_turn`][`NetcodeInterface::try_recv_turn`] repeatedly
-/// - if it returns Some, it will be the user's turn.
+/// - if it returns `Ok`, it will be the user's turn.
 ///
 /// Deviations from this procedure are undefined behavior.
 pub struct NetcodeInterface {
@@ -43,6 +43,9 @@ pub struct NetcodeInterface {
 }
 
 impl NetcodeInterface {
+    /// Create a new interface.
+    ///
+    /// See the struct's [`docs`][`NetcodeInterface`] for invariants.
     pub fn new(ticket: Option<String>) -> Self {
         // hand-coding a bidirectional channel, sorta :p
         let (send_to_iroh, recv_from_game) = mpsc::channel(1);
@@ -62,12 +65,18 @@ impl NetcodeInterface {
         }
     }
 
+    /// Send a turn to the other player.
+    ///
+    /// See the struct's [`docs`][`NetcodeInterface`] for invariants.
     pub fn send_turn(&mut self, turn: [u8; 4]) {
         assert!(self.is_my_turn);
         self.send_to_iroh.blocking_send(turn).unwrap();
         self.is_my_turn = false;
     }
 
+    /// Check if the other player has sent a turn to the user.
+    ///
+    /// See the struct's [`docs`][`NetcodeInterface`] for invariants.
     pub fn try_recv_turn(&mut self) -> Result<[u8; 4], ()> {
         assert!(!self.is_my_turn);
         match self.recv_from_iroh.try_recv() {
@@ -78,5 +87,10 @@ impl NetcodeInterface {
             Err(TryRecvError::Empty) => Err(()),
             Err(TryRecvError::Disconnected) => unreachable!("unreachable if all goes well"),
         }
+    }
+
+    /// Return whether it is the user's turn.
+    pub fn my_turn(&self) -> bool {
+        self.is_my_turn
     }
 }
