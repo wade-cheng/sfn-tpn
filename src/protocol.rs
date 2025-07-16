@@ -87,30 +87,34 @@ impl PieceBoard {
     /// Connect to a host.
     ///
     /// Called by the client, aka player with first move.
-    pub async fn connect_to_host(&self, client: &Endpoint, host: NodeAddr) -> Result<()> {
+    pub async fn connect_to_host(&mut self, client: &Endpoint, host: NodeAddr) -> Result<()> {
         println!("trying to connect to host...");
         let conn = client.connect(host, PIECEBOARD_ALPN).await?;
         let (mut send, mut recv) = conn.open_bi().await?;
 
         println!("client opened bi-stream");
-        // do wahterver
-        // Send some data to be pinged
-        send.write_all(b"PING").await?;
-
-        println!("client pinged");
 
         loop {
+            // Send the data the game wants to send
+            send.write_all(&self.recv_from_game.recv().await.unwrap())
+                .await?;
+
+            println!("client sent data");
             // read the response, which must be PONG as bytes
             let mut buf = [0; 4];
             recv.read_exact(&mut buf).await?;
-            assert_eq!(&buf, b"PONG");
-            println!("client got pong from server.");
+            println!("client recieved {:?}", &buf);
+            self.send_to_game
+                .try_send(buf)
+                .expect("we should never have a full buffer");
         }
     }
 }
 
 impl ProtocolHandler for PieceBoard {
     /// Server code for accepting code.
+    ///
+    /// Server is player with second move.
     ///
     /// The returned future runs on a newly spawned tokio task, so it can run as long as
     /// the connection lasts.
@@ -126,19 +130,21 @@ impl ProtocolHandler for PieceBoard {
         let (mut send, mut recv) = connection.accept_bi().await?;
         println!("server accepted bistream");
 
-        let mut buf = [0; 4];
-        recv.read_exact(&mut buf).await.unwrap();
-        assert_eq!(&buf, b"PING");
-        println!("server got ping");
-
-        // send back "PONG" bytes
-        send.write_all(b"PONG")
-            .await
-            .map_err(AcceptError::from_err)?;
-        println!("server sent pong");
-        // todo!("start playing game as first turner")
         loop {
-            sleep(Duration::from_secs(1)).await;
+            // read the response, which must be PONG as bytes
+            let mut buf = [0; 4];
+            recv.read_exact(&mut buf).await.unwrap();
+            println!("server recieved {:?}", &buf);
+            self.send_to_game
+                .try_send(buf)
+                .expect("we should never have a full buffer");
+
+            // Send the data the game wants to send
+            send.write_all(&self.recv_from_game.recv().await.unwrap())
+                .await
+                .unwrap();
+
+            println!("server sent data");
         }
     }
 }
