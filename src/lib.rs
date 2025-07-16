@@ -16,7 +16,7 @@ use tokio::{
 pub enum Config {
     /// A ticket string obtained from the other player.
     Ticket(String),
-    /// A oneshot sender that will send a newly generated ticket.
+    /// Holds a oneshot sender that will send a newly generated ticket.
     TicketSender(oneshot::Sender<String>),
 }
 
@@ -42,6 +42,9 @@ pub enum Config {
 ///
 /// - [`try_recv_turn`][`NetcodeInterface::try_recv_turn`] repeatedly
 /// - if it returns `Ok`, it will be the user's turn.
+///
+/// Turns are represented as byte buffers of a constant size. Both players'
+/// buffer sizes must be the same.
 ///
 /// Deviations from this procedure are undefined behavior.
 pub struct NetcodeInterface<const SIZE: usize> {
