@@ -68,9 +68,11 @@ impl NetcodeInterface {
     /// Send a turn to the other player.
     ///
     /// See the struct's [`docs`][`NetcodeInterface`] for invariants.
-    pub fn send_turn(&mut self, turn: [u8; 4]) {
+    pub fn send_turn(&mut self, turn: &[u8; 4]) {
         assert!(self.is_my_turn);
-        self.send_to_iroh.blocking_send(turn).unwrap();
+        self.send_to_iroh
+            .try_send(*turn)
+            .expect("we should never have a full buffer");
         self.is_my_turn = false;
     }
 

@@ -39,11 +39,8 @@ pub async fn start_iroh_protocol(
                 .await
                 .unwrap();
 
-            println!("client sent data");
-            // read the response, which must be PONG as bytes
             let mut buf = [0; 4];
             recv.read_exact(&mut buf).await.unwrap();
-            println!("client recieved {:?}", &buf);
             send_to_game
                 .try_send(buf)
                 .expect("we should never have a full buffer");
@@ -72,7 +69,6 @@ pub async fn start_iroh_protocol(
                 loop {
                     let mut buf = [0; 4];
                     recv.read_exact(&mut buf).await.unwrap();
-                    println!("server recieved {:?}", &buf);
                     send_to_game
                         .try_send(buf)
                         .expect("we should never have a full buffer");
@@ -81,8 +77,6 @@ pub async fn start_iroh_protocol(
                     send.write_all(&recv_from_game.recv().await.unwrap())
                         .await
                         .unwrap();
-
-                    println!("server sent data");
                 }
             }
             None => todo!(),
