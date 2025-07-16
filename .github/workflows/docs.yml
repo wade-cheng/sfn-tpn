@@ -41,6 +41,20 @@ jobs:
     - name: Generate documentation
       run: cargo doc --no-deps
 
+    - name: Add index.html redirect
+      run: |
+        echo '<!DOCTYPE html>
+        <html>
+        <head>
+            <meta charset="utf-8">
+            <title>Redirecting to documentation</title>
+            <meta http-equiv="refresh" content="0; url=./doc">
+        </head>
+        <body>
+            <p>Redirecting to <a href="./doc">documentation</a>...</p>
+        </body>
+        </html>' > target/doc/index.html
+
     - name: Setup Pages
       uses: actions/configure-pages@v4
 
