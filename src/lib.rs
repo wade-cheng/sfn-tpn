@@ -1,4 +1,4 @@
-//! Saffron's two-player strategy game networking code.
+//! Saffron's two-player turn-based strategy game networking code.
 
 mod protocol;
 
@@ -13,7 +13,13 @@ use tokio::{
 /// called from the context of a Tokio runtime. The procedure for operation
 /// is as follows.
 ///
+/// A [`new`][`NetcodeInterface::new`] `NetcodeInterface` should be created at
+/// both machines running the game. The first, the "server," must provide
+/// `None` ticket. The second, the "client," must provide `Some` ticket string
+/// the server reveals. (The server currently prints it to stdout. In the future,
+/// this might be relayed through a tokio oneshot thing.)
 ///
+/// The server moves second and the client moves first.
 ///
 /// If it is the user's turn, they may:
 ///
@@ -38,7 +44,7 @@ pub struct NetcodeInterface {
 
 impl NetcodeInterface {
     pub fn new(ticket: Option<String>) -> Self {
-        // hand-coding a bidirectional stream, sorta :p
+        // hand-coding a bidirectional channel, sorta :p
         let (send_to_iroh, recv_from_game) = mpsc::channel(1);
         let (send_to_game, recv_from_iroh) = mpsc::channel(1);
         let is_my_turn = ticket.is_some();

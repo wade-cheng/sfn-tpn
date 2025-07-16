@@ -1,3 +1,5 @@
+//! WARNING: NOT A FINISHED EXAMPLE YET
+
 use std::time::Duration;
 
 use anyhow::{Error, Result};
