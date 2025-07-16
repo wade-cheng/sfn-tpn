@@ -16,9 +16,9 @@ use crate::Config;
 pub const ALPN: &[u8] = b"saffron/sfn-tpn/0";
 
 /// Starts the pieceboard iroh protocol.
-pub async fn start_iroh_protocol(
-    send_to_game: Sender<[u8; 4]>,
-    mut recv_from_game: Receiver<[u8; 4]>,
+pub async fn start_iroh_protocol<const SIZE: usize>(
+    send_to_game: Sender<[u8; SIZE]>,
+    mut recv_from_game: Receiver<[u8; SIZE]>,
     config: Config,
 ) {
     println!("started iroh protocol in new thread");
@@ -43,7 +43,7 @@ pub async fn start_iroh_protocol(
                     .await
                     .unwrap();
 
-                let mut buf = [0; 4];
+                let mut buf = [0; SIZE];
                 recv.read_exact(&mut buf).await.unwrap();
                 send_to_game
                     .try_send(buf)
@@ -75,7 +75,7 @@ pub async fn start_iroh_protocol(
                     let (mut send, mut recv) = connection.accept_bi().await.unwrap();
 
                     loop {
-                        let mut buf = [0; 4];
+                        let mut buf = [0; SIZE];
                         recv.read_exact(&mut buf).await.unwrap();
                         send_to_game
                             .try_send(buf)

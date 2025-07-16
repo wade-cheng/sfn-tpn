@@ -44,17 +44,17 @@ pub enum Config {
 /// - if it returns `Ok`, it will be the user's turn.
 ///
 /// Deviations from this procedure are undefined behavior.
-pub struct NetcodeInterface {
+pub struct NetcodeInterface<const SIZE: usize> {
     is_my_turn: bool,
-    recv_from_iroh: mpsc::Receiver<[u8; 4]>,
-    send_to_iroh: mpsc::Sender<[u8; 4]>,
+    recv_from_iroh: mpsc::Receiver<[u8; SIZE]>,
+    send_to_iroh: mpsc::Sender<[u8; SIZE]>,
     /// A handle to the thread running iroh under the hood.
     ///
     /// Might need to be dropped if we want to be pedantic about the code.
     _iroh_handle: JoinHandle<()>,
 }
 
-impl NetcodeInterface {
+impl<const SIZE: usize> NetcodeInterface<SIZE> {
     /// Create a new interface.
     ///
     /// See the struct's [`docs`][`NetcodeInterface`] for invariants.
@@ -83,7 +83,7 @@ impl NetcodeInterface {
     /// Send a turn to the other player.
     ///
     /// See the struct's [`docs`][`NetcodeInterface`] for invariants.
-    pub fn send_turn(&mut self, turn: &[u8; 4]) {
+    pub fn send_turn(&mut self, turn: &[u8; SIZE]) {
         assert!(self.is_my_turn);
         self.send_to_iroh
             .try_send(*turn)
@@ -94,7 +94,7 @@ impl NetcodeInterface {
     /// Check if the other player has sent a turn to the user.
     ///
     /// See the struct's [`docs`][`NetcodeInterface`] for invariants.
-    pub fn try_recv_turn(&mut self) -> Result<[u8; 4], ()> {
+    pub fn try_recv_turn(&mut self) -> Result<[u8; SIZE], ()> {
         assert!(!self.is_my_turn);
         match self.recv_from_iroh.try_recv() {
             Ok(t) => {
