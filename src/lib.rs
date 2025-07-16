@@ -3,9 +3,22 @@
 mod protocol;
 
 use tokio::{
-    sync::mpsc::{self, Receiver, Sender, error::TryRecvError},
+    sync::{
+        mpsc::{self, error::TryRecvError},
+        oneshot::{self},
+    },
     task::{self, JoinHandle},
 };
+
+/// Config used to create a new [`NetcodeInterface`].
+///
+/// The user was either given a ticket, or is generating a new ticket.
+pub enum Config {
+    /// A ticket string obtained from the other player.
+    Ticket(String),
+    /// A oneshot sender that will send a newly generated ticket.
+    TicketSender(oneshot::Sender<String>),
+}
 
 /// The interface for netcode.
 ///
@@ -14,10 +27,9 @@ use tokio::{
 /// is as follows.
 ///
 /// A [`new`][`NetcodeInterface::new`] `NetcodeInterface` should be created on
-/// the two players' machines. The first, the "server," must provide
-/// `None` ticket. The second, the "client," must provide `Some` ticket string
-/// the server reveals. (The server currently prints it to stdout. In the future,
-/// this might be relayed through a tokio oneshot thing.)
+/// the two players' machines. The first, the "server," must provide a oneshot
+/// sender that receives a newly generated ticket. The second, the "client,"
+/// must provide a ticket string from that server.
 ///
 /// The server moves second and the client moves first.
 ///
@@ -34,8 +46,8 @@ use tokio::{
 /// Deviations from this procedure are undefined behavior.
 pub struct NetcodeInterface {
     is_my_turn: bool,
-    recv_from_iroh: Receiver<[u8; 4]>,
-    send_to_iroh: Sender<[u8; 4]>,
+    recv_from_iroh: mpsc::Receiver<[u8; 4]>,
+    send_to_iroh: mpsc::Sender<[u8; 4]>,
     /// A handle to the thread running iroh under the hood.
     ///
     /// Might need to be dropped if we want to be pedantic about the code.
@@ -46,15 +58,18 @@ impl NetcodeInterface {
     /// Create a new interface.
     ///
     /// See the struct's [`docs`][`NetcodeInterface`] for invariants.
-    pub fn new(ticket: Option<String>) -> Self {
+    pub fn new(config: Config) -> Self {
         // hand-coding a bidirectional channel, sorta :p
         let (send_to_iroh, recv_from_game) = mpsc::channel(1);
         let (send_to_game, recv_from_iroh) = mpsc::channel(1);
-        let is_my_turn = ticket.is_some();
+        let is_my_turn = match &config {
+            Config::Ticket(_) => true,
+            Config::TicketSender(_) => false,
+        };
         let _iroh_handle = task::spawn(protocol::start_iroh_protocol(
             send_to_game,
             recv_from_game,
-            ticket,
+            config,
         ));
 
         Self {

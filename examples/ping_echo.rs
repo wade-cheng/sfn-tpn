@@ -1,9 +1,9 @@
 //! Send a ping/pong, then echo an incrementing counter.
 
 use std::time::Duration;
-use tokio::time::sleep;
+use tokio::{sync::oneshot, time::sleep};
 
-use sfn_tpn::NetcodeInterface;
+use sfn_tpn::{Config, NetcodeInterface};
 
 /// Return whether our process is a client.
 ///
@@ -55,7 +55,7 @@ async fn wait_for<A, T>(f: fn(&mut A) -> Result<T, ()>, a: &mut A) -> T {
 async fn main() -> Result<(), String> {
     if is_client()? {
         // create a send side & send a ping
-        let mut netcode = NetcodeInterface::new(Some(ticket()?));
+        let mut netcode = NetcodeInterface::new(Config::Ticket(ticket()?));
         netcode.send_turn(b"ping");
         println!("Client sent ping");
 
@@ -82,7 +82,14 @@ async fn main() -> Result<(), String> {
         }
     } else {
         // create the receive side
-        let mut netcode = NetcodeInterface::new(None);
+        let (send, recv) = oneshot::channel();
+        let mut netcode = NetcodeInterface::new(Config::TicketSender(send));
+
+        println!(
+            "hosting game. another player may join with \n\n\
+            cargo run --example ping_echo client --ticket={}",
+            recv.await.unwrap()
+        );
 
         assert_eq!(
             b"ping",
