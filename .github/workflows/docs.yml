@@ -48,10 +48,10 @@ jobs:
         <head>
             <meta charset="utf-8">
             <title>Redirecting to documentation</title>
-            <meta http-equiv="refresh" content="0; url=./doc">
+            <meta http-equiv="refresh" content="0; url=./sfn_tpn/">
         </head>
         <body>
-            <p>Redirecting to <a href="./doc">documentation</a>...</p>
+            <p>Redirecting to <a href="./sfn_tpn/">documentation</a>...</p>
         </body>
         </html>' > target/doc/index.html
 
