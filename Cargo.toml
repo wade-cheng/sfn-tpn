@@ -5,8 +5,8 @@ keywords = ["gamedev", "p2p", "multiplayer", "turn-based"]
 categories = ["game-development", "asynchronous"]
 version = "1.0.1"
 edition = "2024"
-license-file = "LICENSE"
-documentation = "http://wade-cheng.is-a.dev/sfn-tpn/"
+license = "MIT"
+documentation = "https://docs.rs/sfn_tpn"
 repository = "https://github.com/wade-cheng/sfn-tpn"
 readme = "README.md"
 
