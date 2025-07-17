@@ -2,12 +2,13 @@
 name = "sfn-tpn"
 description = "saffron's two-player networking code for turn-based games."
 keywords = ["gamedev", "p2p", "multiplayer", "turn-based"]
+categories = ["game-development", "asynchronous"]
 version = "1.0.0"
 edition = "2024"
 license-file = "LICENSE"
 documentation = "http://wade-cheng.is-a.dev/sfn-tpn/"
 repository = "https://github.com/wade-cheng/sfn-tpn"
-publish = false
+readme = "README.md"
 
 [dependencies]
 iroh = "0.90.0"
