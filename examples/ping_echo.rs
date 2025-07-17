@@ -1,4 +1,6 @@
 //! Send a ping/pong, then echo an incrementing counter.
+//!
+//! Start the server with `cargo run --example ping_echo server`, and follow directions to run the client.
 
 use std::time::Duration;
 use tokio::{sync::oneshot, time::sleep};
@@ -86,7 +88,7 @@ async fn main() -> Result<(), String> {
         let mut netcode = NetcodeInterface::new(Config::TicketSender(send));
 
         println!(
-            "hosting game. another player may join with \n\n\
+            "hosting ping_echo. another player may join with \n\n\
             cargo run --example ping_echo client --ticket={}",
             recv.await.unwrap()
         );
