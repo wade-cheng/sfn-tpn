@@ -15,6 +15,9 @@ iroh = "0.90.0"
 iroh-base = "0.90.0"
 tokio = "1.46.1"
 
+[dev-dependencies]
+ggez = { git = "https://github.com/ggez/ggez", rev = "9a4d240"}
+
 [package.metadata.release]
 allow-branch = ["main"]
 verify = false

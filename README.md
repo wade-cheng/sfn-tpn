@@ -32,4 +32,3 @@ This crate exposes a [`NetcodeInterface`](https://docs.rs/sfn_tpn/latest/sfn_tpn
 ## Examples
 
 - See the examples directory at <https://github.com/wade-cheng/sfn-tpn>
-- <https://github.com/wade-cheng/pieceboard>
