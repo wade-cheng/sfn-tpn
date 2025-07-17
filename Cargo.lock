@@ -2801,7 +2801,7 @@ dependencies = [
 
 [[package]]
 name = "sfn-tpn"
-version = "1.0.0"
+version = "1.0.1"
 dependencies = [
  "iroh",
  "iroh-base",
