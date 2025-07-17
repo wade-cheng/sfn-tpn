@@ -16,7 +16,7 @@
 //!
 //! This crate exposes a [`NetcodeInterface`] with functionality for
 //!
-//! - connecting two game instances
+//! - connecting two game instances (peer-to-peer via [iroh](https://www.iroh.computer/))
 //! - sending byte buffers of a constant size between the two game instances
 //! - doing so in a strictly turn-based manner (as described above)
 //!
@@ -24,6 +24,8 @@
 //!
 //! - connect multiple game instances
 //! - anything not turn-based
+//! - run on systems not supported by Tokio and iroh
+//!   - in particular, wasm is not supported because of threading shenanigans
 //!
 //! # Examples
 //!
@@ -52,9 +54,9 @@ pub enum Config {
 
 /// The interface for netcode.
 ///
-/// Runs Tokio and iroh under the hood in a separate thread. Methods must be
-/// called from the context of a Tokio runtime. The procedure for operation
-/// is as follows.
+/// Runs [Tokio](https://tokio.rs/) and [iroh](https://www.iroh.computer/)
+/// under the hood in a separate thread. So, methods must be called from the
+/// context of a Tokio runtime. The procedure for operation is as follows.
 ///
 /// A [`new`][`NetcodeInterface::new`] `NetcodeInterface` should be created on
 /// the two players' machines. The first, the "server," must provide a oneshot

@@ -1,9 +1,19 @@
 [package]
 name = "sfn-tpn"
+description = "saffron's two-player networking code for turn-based games."
+keywords = ["gamedev", "p2p", "multiplayer", "turn-based"]
 version = "0.1.0"
 edition = "2024"
+license-file = "LICENSE"
+documentation = "http://wade-cheng.is-a.dev/sfn-tpn/"
+repository = "https://github.com/wade-cheng/sfn-tpn"
+publish = false
 
 [dependencies]
 iroh = "0.90.0"
 iroh-base = "0.90.0"
 tokio = "1.46.1"
+
+[package.metadata.release]
+allow-branch = ["main"]
+verify = false
